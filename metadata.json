@@ -1,0 +1,5 @@
+{
+  "name": "Open Bloc Vic",
+  "description": "A web application to track scores and rankings for the Open Bloc Vic climbing competition. Users can log their completed boulders, view leaderboards, and manage their profiles. Admins have special permissions to score final boulders.",
+  "requestFramePermissions": []
+}
