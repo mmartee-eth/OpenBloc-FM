@@ -14,26 +14,53 @@ type DbBlock = { id: number; name: string; color: string; base_points: number; i
 type DbBlockCompletion = { user_id: string; block_id: number; completed: boolean; };
 type DbBlockAttempt = { user_id: string; block_id: number; completed: boolean; arbiter_id: string; };
 
-let DB_USERS: DbUser[] = [
+// --- LocalStorage Persistence Logic ---
+const DB_USERS_KEY = 'openbloc_db_users';
+const DB_BLOCKS_KEY = 'openbloc_db_blocks';
+const DB_BLOCK_COMPLETIONS_KEY = 'openbloc_db_block_completions';
+const DB_BLOCK_ATTEMPTS_KEY = 'openbloc_db_block_attempts';
+
+// Initial Data
+const initialDbUsers: DbUser[] = [
     { id: 'admin-1', name: 'Jofre TS', email: 'jofrets@gmail.com', role: UserRole.ADMIN, gender: Gender.MALE, category: 'absoluta', dorsal: 1 },
     ...Array.from({ length: 6 }, (_, i) => ({
       id: `referee-${i + 1}`, name: `Arbitre ${i + 1}`, email: `arbitre${i + 1}@gmail.com`, role: UserRole.ARBITRE, gender: Gender.MALE, category: 'absoluta',
     })),
 ];
-
-const DB_BLOCKS: DbBlock[] = Array.from({ length: 50 }, (_, i) => {
+const initialDbBlocks: DbBlock[] = Array.from({ length: 50 }, (_, i) => {
     const id = i + 1;
     const colors = ['verd', 'blau', 'vermell', 'groc', 'taronja', 'lila'];
     return { id, name: `Bloc ${id}`, color: colors[i % 6], base_points: 100, is_variable: id >= 45 };
 });
-
-let DB_BLOCK_COMPLETIONS: DbBlockCompletion[] = [
+const initialDbBlockCompletions: DbBlockCompletion[] = [
     { user_id: 'admin-1', block_id: 1, completed: true }, { user_id: 'admin-1', block_id: 7, completed: true }, { user_id: 'admin-1', block_id: 22, completed: true },
 ];
-
-let DB_BLOCK_ATTEMPTS: DbBlockAttempt[] = [
+const initialDbBlockAttempts: DbBlockAttempt[] = [
     { user_id: 'admin-1', block_id: 45, completed: false, arbiter_id: 'referee-1' }, { user_id: 'admin-1', block_id: 45, completed: true, arbiter_id: 'referee-1' },
 ];
+
+// Helper to load from localStorage or use initial data
+function loadDb<T>(key: string, initialData: T): T {
+    try {
+        const stored = localStorage.getItem(key);
+        if (stored) {
+            return JSON.parse(stored);
+        }
+        localStorage.setItem(key, JSON.stringify(initialData));
+        return initialData;
+    } catch (e) {
+        console.error(`Error reading ${key} from localStorage`, e);
+        localStorage.setItem(key, JSON.stringify(initialData));
+        return initialData;
+    }
+}
+
+// Live DB variables, loaded from localStorage or initialized
+let DB_USERS = loadDb<DbUser[]>(DB_USERS_KEY, initialDbUsers);
+let DB_BLOCKS = loadDb<DbBlock[]>(DB_BLOCKS_KEY, initialDbBlocks);
+let DB_BLOCK_COMPLETIONS = loadDb<DbBlockCompletion[]>(DB_BLOCK_COMPLETIONS_KEY, initialDbBlockCompletions);
+let DB_BLOCK_ATTEMPTS = loadDb<DbBlockAttempt[]>(DB_BLOCK_ATTEMPTS_KEY, initialDbBlockAttempts);
+// --- End Persistence Logic ---
 
 // MOCK API
 const mockApi = {
@@ -52,6 +79,7 @@ const mockApi = {
         const userIndex = DB_USERS.findIndex(u => u.id === updatedUser.id);
         if (userIndex !== -1) {
             DB_USERS[userIndex] = { ...DB_USERS[userIndex], name: updatedUser.username };
+            localStorage.setItem(DB_USERS_KEY, JSON.stringify(DB_USERS));
         }
         
         DB_BLOCK_COMPLETIONS = DB_BLOCK_COMPLETIONS.filter(c => c.user_id !== updatedUser.id);
@@ -75,6 +103,9 @@ const mockApi = {
                 DB_BLOCK_COMPLETIONS.push({ user_id: updatedUser.id, block_id: blockId, completed: true });
             }
         }
+        localStorage.setItem(DB_BLOCK_COMPLETIONS_KEY, JSON.stringify(DB_BLOCK_COMPLETIONS));
+        localStorage.setItem(DB_BLOCK_ATTEMPTS_KEY, JSON.stringify(DB_BLOCK_ATTEMPTS));
+
         const dbUser = DB_USERS.find(u => u.id === updatedUser.id);
         if (!dbUser) throw new Error("User vanished after update");
         return { ...dbUser, username: dbUser.name, completedBoulders: getCompletedBouldersForUser(dbUser.id) };
@@ -92,6 +123,7 @@ const mockApi = {
             const colorName = Object.keys(DB_COLOR_TO_TAILWIND).find(key => DB_COLOR_TO_TAILWIND[key] === updatedBoulder.color) ||
                               COLOR_OPTIONS.find(c => c.class === updatedBoulder.color)?.name.toLowerCase();
             if (colorName) dbBoulder.color = colorName;
+            localStorage.setItem(DB_BLOCKS_KEY, JSON.stringify(DB_BLOCKS));
         }
         return mapDbBoulderToAppBoulder(DB_BLOCKS[index]);
     }
@@ -144,7 +176,9 @@ const App: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
 
     const fetchAllData = useCallback(async () => {
-        const [allUsers, allBoulders] = await Promise.all([mockApi.getUsers(), mockApi.getBoulders()]);
+        // Data is now sourced from global vars which are loaded from localStorage
+        const allUsers = await mockApi.getUsers();
+        const allBoulders = await mockApi.getBoulders();
         setUsers(allUsers);
         setBoulders(allBoulders);
     }, []);
