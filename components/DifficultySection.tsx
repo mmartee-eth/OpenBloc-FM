@@ -19,7 +19,7 @@ const DifficultySection: React.FC<DifficultySectionProps> = ({ difficulty, bould
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
         {boulders.map((boulder) => {
           const completedEntry = completedBoulders[boulder.id];
-          const isBoulderCompleted = boulder.difficulty === BoulderDifficulty.PUNTUABLES
+          const isBoulderCompleted = boulder.is_variable
             ? typeof completedEntry === 'object' && (completedEntry as PuntuableAttempt).isCompleted
             : !!completedEntry;
           

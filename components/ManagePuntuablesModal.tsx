@@ -1,6 +1,6 @@
 import React from 'react';
-import { User, Boulder, BoulderDifficulty, PuntuableAttempt } from '../types';
-import { PUNTUABLES_SCORING, MIN_PUNTUABLES_SCORE } from '../constants';
+import { User, Boulder, PuntuableAttempt } from '../types';
+import { PUNTUABLES_SCORING, FOURTH_OR_MORE_POINTS } from '../constants';
 
 interface ManagePuntuablesModalProps {
   user: User;
@@ -10,7 +10,7 @@ interface ManagePuntuablesModalProps {
 }
 
 const ManagePuntuablesModal: React.FC<ManagePuntuablesModalProps> = ({ user, onClose, onUpdateUser, boulders }) => {
-  const puntuablesBoulders = boulders.filter(b => b.difficulty === BoulderDifficulty.PUNTUABLES);
+  const puntuablesBoulders = boulders.filter(b => b.is_variable);
 
   const updatePuntuableData = (boulderId: string, newPuntuableData: PuntuableAttempt | undefined) => {
     const newCompleted = { ...user.completedBoulders };
@@ -22,27 +22,27 @@ const ManagePuntuablesModal: React.FC<ManagePuntuablesModalProps> = ({ user, onC
     onUpdateUser({ ...user, completedBoulders: newCompleted });
   };
 
-  const handleAttemptChange = (boulderId: string, change: 1 | -1) => {
+  const handleAttemptChange = (boulderId: number, change: 1 | -1) => {
     const currentData = (user.completedBoulders[boulderId] || { attempts: 0, isCompleted: false }) as PuntuableAttempt;
     const newAttempts = Math.max(0, currentData.attempts + change);
     
     // If attempts drop to 0, it can't be completed
     const newIsCompleted = newAttempts > 0 ? currentData.isCompleted : false;
     
-    updatePuntuableData(boulderId, { attempts: newAttempts, isCompleted: newIsCompleted });
+    updatePuntuableData(String(boulderId), { attempts: newAttempts, isCompleted: newIsCompleted });
   };
   
-  const handleCompletionChange = (boulderId: string, isChecked: boolean) => {
+  const handleCompletionChange = (boulderId: number, isChecked: boolean) => {
     const currentData = (user.completedBoulders[boulderId] || { attempts: 0, isCompleted: false }) as PuntuableAttempt;
     // If marking as completed with 0 attempts, set attempts to 1
     const newAttempts = isChecked && currentData.attempts === 0 ? 1 : currentData.attempts;
 
-    updatePuntuableData(boulderId, { attempts: newAttempts, isCompleted: isChecked });
+    updatePuntuableData(String(boulderId), { attempts: newAttempts, isCompleted: isChecked });
   };
 
   const getScore = (completionData: PuntuableAttempt | number | undefined) => {
       if (typeof completionData !== 'object' || !completionData.isCompleted) return 0;
-      return PUNTUABLES_SCORING[completionData.attempts] || MIN_PUNTUABLES_SCORE;
+      return PUNTUABLES_SCORING[completionData.attempts] || FOURTH_OR_MORE_POINTS;
   };
 
   return (

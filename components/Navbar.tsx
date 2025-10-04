@@ -33,7 +33,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate, onLogout, curr
             <Logo size="sm" />
           </div>
           <div className="flex items-center gap-2 sm:gap-4">
-            {currentUser.role !== UserRole.REFEREE && (
+            {currentUser.role !== UserRole.ARBITRE && (
               <>
                 <NavItem
                   icon={<ClimbIcon className="h-5 w-5" />}

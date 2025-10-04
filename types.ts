@@ -1,13 +1,12 @@
 export enum UserRole {
-  PARTICIPANT = 'PARTICIPANT',
-  ADMIN = 'ADMIN',
-  REFEREE = 'REFEREE',
+  PARTICIPANT = 'participant',
+  ADMIN = 'admin',
+  ARBITRE = 'arbitre',
 }
 
 export enum Gender {
-  MALE = 'MALE',
-  FEMALE = 'FEMALE',
-  OTHER = 'OTHER',
+  MALE = 'M',
+  FEMALE = 'F',
 }
 
 export type PuntuableAttempt = {
@@ -21,7 +20,7 @@ export type User = {
   email: string;
   role: UserRole;
   gender: Gender;
-  age: number;
+  category: string;
   completedBoulders: Record<string, number | PuntuableAttempt>;
 };
 
@@ -34,11 +33,12 @@ export enum BoulderDifficulty {
 }
 
 export type Boulder = {
-  id: string;
+  id: number;
   name: string; // e.g. "Bloc 1"
   difficulty: BoulderDifficulty;
-  points: number;
+  base_points: number;
   color: string; // e.g. 'bg-green-600'
+  is_variable: boolean;
 };
 
 export type Page = 'login' | 'home' | 'leaderboard' | 'profile' | 'referee';

@@ -13,12 +13,12 @@ interface BoulderCardProps {
 
 const BoulderCard: React.FC<BoulderCardProps> = ({ boulder, isCompleted, onToggleComplete, currentUser, onUpdateBoulder }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const isPuntuables = boulder.difficulty === 'Puntuables';
+  const isPuntuables = boulder.is_variable;
   const isDisabled = isPuntuables && currentUser.role !== UserRole.ADMIN;
 
   const handleClick = () => {
     if (!isDisabled) {
-      onToggleComplete(boulder.id, !isCompleted);
+      onToggleComplete(String(boulder.id), !isCompleted);
     }
   };
   

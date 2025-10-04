@@ -1,13 +1,11 @@
-import { Boulder, BoulderDifficulty } from './types';
+import { BoulderDifficulty } from './types';
 
 export const PUNTUABLES_SCORING: { [key: number]: number } = {
-  1: 60,
+  1: 100,
   2: 50,
-  3: 40,
-  4: 30,
-  5: 20,
+  3: 25,
 };
-export const MIN_PUNTUABLES_SCORE = 10;
+export const FOURTH_OR_MORE_POINTS = 10;
 
 export const DIFFICULTY_ORDER: BoulderDifficulty[] = [
   BoulderDifficulty.MOLT_FACIL,
@@ -33,6 +31,15 @@ export const DIFFICULTY_BG_COLORS: Record<BoulderDifficulty, string> = {
   [BoulderDifficulty.PUNTUABLES]: 'bg-purple-800/20',
 };
 
+export const DB_COLOR_TO_TAILWIND: Record<string, string> = {
+    'verd': 'bg-green-500',
+    'blau': 'bg-blue-500',
+    'vermell': 'bg-red-600',
+    'groc': 'bg-yellow-400',
+    'taronja': 'bg-orange-500',
+    'lila': 'bg-purple-600',
+};
+
 export const COLOR_OPTIONS = [
     { name: 'Rosa', class: 'bg-pink-500' },
     { name: 'Lila', class: 'bg-purple-600' },
@@ -45,29 +52,3 @@ export const COLOR_OPTIONS = [
     { name: 'Negre', class: 'bg-gray-800' },
     { name: 'Blanc', class: 'bg-gray-200' },
 ];
-
-export const generateInitialBoulders = (): Boulder[] => {
-  const boulders: Boulder[] = [];
-  let blocNumber = 1;
-
-  const createBouldersForDifficulty = (difficulty: BoulderDifficulty, count: number, points: number) => {
-    for (let i = 0; i < count; i++) {
-      boulders.push({
-        id: `bloc-${blocNumber}`,
-        name: `Bloc ${blocNumber}`,
-        difficulty,
-        points,
-        color: INITIAL_DIFFICULTY_COLORS[difficulty],
-      });
-      blocNumber++;
-    }
-  };
-
-  createBouldersForDifficulty(BoulderDifficulty.MOLT_FACIL, 4, 1);
-  createBouldersForDifficulty(BoulderDifficulty.FACIL, 13, 2);
-  createBouldersForDifficulty(BoulderDifficulty.MITJA, 18, 5);
-  createBouldersForDifficulty(BoulderDifficulty.DIFICIL, 9, 10);
-  createBouldersForDifficulty(BoulderDifficulty.PUNTUABLES, 6, 0); // Points are calculated separately
-
-  return boulders;
-};
