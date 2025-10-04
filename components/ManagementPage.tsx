@@ -2,13 +2,13 @@ import React, { useState, useMemo } from 'react';
 import { User, UserRole, Boulder } from '../types';
 import ManagePuntuablesModal from './ManagePuntuablesModal';
 
-interface RefereePageProps {
+interface ManagementPageProps {
   allUsers: User[];
   onUpdateUser: (updatedUser: User) => void;
   boulders: Boulder[];
 }
 
-const RefereePage: React.FC<RefereePageProps> = ({ allUsers, onUpdateUser, boulders }) => {
+const ManagementPage: React.FC<ManagementPageProps> = ({ allUsers, onUpdateUser, boulders }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
@@ -28,12 +28,12 @@ const RefereePage: React.FC<RefereePageProps> = ({ allUsers, onUpdateUser, bould
     onUpdateUser(updatedUser);
     setSelectedUser(updatedUser);
   };
-  
+
   const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-4xl font-extrabold text-center mb-2">Panell de l'Àrbitre</h1>
+      <h1 className="text-4xl font-extrabold text-center mb-2">Gestió de Participants</h1>
       <p className="text-center text-brand-text-secondary mb-8">Busca un participant per nom o dorsal per gestionar la seva puntuació.</p>
 
       <div className="mb-8 max-w-lg mx-auto">
@@ -82,4 +82,4 @@ const RefereePage: React.FC<RefereePageProps> = ({ allUsers, onUpdateUser, bould
   );
 };
 
-export default RefereePage;
+export default ManagementPage;

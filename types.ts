@@ -21,6 +21,7 @@ export type User = {
   role: UserRole;
   gender: Gender;
   category: string;
+  dorsal?: number;
   completedBoulders: Record<string, number | PuntuableAttempt>;
 };
 
@@ -41,4 +42,4 @@ export type Boulder = {
   is_variable: boolean;
 };
 
-export type Page = 'login' | 'home' | 'leaderboard' | 'profile' | 'referee';
+export type Page = 'login' | 'home' | 'leaderboard' | 'profile' | 'management';

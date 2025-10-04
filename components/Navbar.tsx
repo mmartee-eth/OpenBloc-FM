@@ -1,6 +1,6 @@
 import React from 'react';
 import { Page, User, UserRole } from '../types';
-import { ClimbIcon, ChartIcon, UserIcon, LogoutIcon } from './icons';
+import { ClimbIcon, ChartIcon, UserIcon, LogoutIcon, ShieldIcon } from './icons';
 import Logo from './Logo';
 
 interface NavbarProps {
@@ -55,6 +55,16 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate, onLogout, curr
                 />
               </>
             )}
+
+            {(currentUser.role === UserRole.ADMIN || currentUser.role === UserRole.ARBITRE) && (
+                 <NavItem
+                    icon={<ShieldIcon className="h-5 w-5" />}
+                    label="Gestionar"
+                    isActive={currentPage === 'management'}
+                    onClick={() => onNavigate('management')}
+                />
+            )}
+            
             <button onClick={onLogout} className="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-brand-text-secondary hover:bg-brand-surface-secondary hover:text-brand-text transition-colors">
               <LogoutIcon className="h-5 w-5" />
               <span className="hidden sm:inline">Tancar Sessió</span>

@@ -5,21 +5,20 @@ import HomePage from './components/HomePage';
 import LeaderboardPage from './components/LeaderboardPage';
 import ProfilePage from './components/ProfilePage';
 import Navbar from './components/Navbar';
-import RefereePage from './components/RefereePage';
+import ManagementPage from './components/ManagementPage';
 import { DB_COLOR_TO_TAILWIND, COLOR_OPTIONS } from './constants';
 
 // MOCK DB based on SQL schema
-type DbUser = { id: string; name: string; email: string; role: UserRole; gender: Gender; category: string; };
+type DbUser = { id: string; name: string; email: string; role: UserRole; gender: Gender; category: string; dorsal?: number; };
 type DbBlock = { id: number; name: string; color: string; base_points: number; is_variable: boolean; };
 type DbBlockCompletion = { user_id: string; block_id: number; completed: boolean; };
 type DbBlockAttempt = { user_id: string; block_id: number; completed: boolean; arbiter_id: string; };
 
 let DB_USERS: DbUser[] = [
-    { id: 'admin-1', name: 'Jofre TS', email: 'jofrets@gmail.com', role: UserRole.ADMIN, gender: Gender.MALE, category: 'absoluta' },
+    { id: 'admin-1', name: 'Jofre TS', email: 'jofrets@gmail.com', role: UserRole.ADMIN, gender: Gender.MALE, category: 'absoluta', dorsal: 1 },
     ...Array.from({ length: 6 }, (_, i) => ({
       id: `referee-${i + 1}`, name: `Arbitre ${i + 1}`, email: `arbitre${i + 1}@gmail.com`, role: UserRole.ARBITRE, gender: Gender.MALE, category: 'absoluta',
     })),
-    { id: 'participant-1', name: 'Marti Antentas', email: 'martiantentas@gmail.com', role: UserRole.PARTICIPANT, gender: Gender.MALE, category: 'universitaris' },
 ];
 
 const DB_BLOCKS: DbBlock[] = Array.from({ length: 50 }, (_, i) => {
@@ -30,12 +29,10 @@ const DB_BLOCKS: DbBlock[] = Array.from({ length: 50 }, (_, i) => {
 
 let DB_BLOCK_COMPLETIONS: DbBlockCompletion[] = [
     { user_id: 'admin-1', block_id: 1, completed: true }, { user_id: 'admin-1', block_id: 7, completed: true }, { user_id: 'admin-1', block_id: 22, completed: true },
-    { user_id: 'participant-1', block_id: 3, completed: true }, { user_id: 'participant-1', block_id: 10, completed: true },
 ];
 
 let DB_BLOCK_ATTEMPTS: DbBlockAttempt[] = [
     { user_id: 'admin-1', block_id: 45, completed: false, arbiter_id: 'referee-1' }, { user_id: 'admin-1', block_id: 45, completed: true, arbiter_id: 'referee-1' },
-    { user_id: 'participant-1', block_id: 46, completed: false, arbiter_id: 'referee-2' },
 ];
 
 // MOCK API
@@ -147,24 +144,43 @@ const App: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
 
     const fetchAllData = useCallback(async () => {
-        setIsLoading(true);
         const [allUsers, allBoulders] = await Promise.all([mockApi.getUsers(), mockApi.getBoulders()]);
         setUsers(allUsers);
         setBoulders(allBoulders);
-        setIsLoading(false);
     }, []);
 
     useEffect(() => {
-        fetchAllData();
+        const initializeApp = async () => {
+            setIsLoading(true);
+            await fetchAllData();
+            const savedEmail = localStorage.getItem('loggedInUserEmail');
+            if (savedEmail) {
+                const user = await mockApi.login(savedEmail);
+                if (user) {
+                    setCurrentUser(user);
+                    if (user.role === UserRole.ARBITRE) {
+                        setCurrentPage('management');
+                    } else {
+                        setCurrentPage('home');
+                    }
+                } else {
+                    // Clean up if the user from localStorage is no longer valid
+                    localStorage.removeItem('loggedInUserEmail');
+                }
+            }
+            setIsLoading(false);
+        };
+        initializeApp();
     }, [fetchAllData]);
 
     const handleLogin = async (email: string) => {
         setLoginError(null);
         const user = await mockApi.login(email);
         if (user) {
+            localStorage.setItem('loggedInUserEmail', user.email);
             setCurrentUser(user);
             if (user.role === UserRole.ARBITRE) {
-                setCurrentPage('referee');
+                setCurrentPage('management');
             } else {
                 setCurrentPage('home');
             }
@@ -174,6 +190,7 @@ const App: React.FC = () => {
     };
     
     const handleLogout = () => {
+        localStorage.removeItem('loggedInUserEmail');
         setCurrentUser(null);
     };
     
@@ -199,6 +216,10 @@ const App: React.FC = () => {
         setBoulders([...latestBoulders]);
     }, []);
 
+    if (isLoading) {
+        return <div className="min-h-screen flex items-center justify-center">Carregant...</div>;
+    }
+
     if (!currentUser) {
         return <LoginPage onLogin={handleLogin} error={loginError} />;
     }
@@ -216,13 +237,12 @@ const App: React.FC = () => {
                 return <LeaderboardPage 
                     users={users} 
                     currentUser={currentUser} 
-                    onUpdateUser={handleUpdateUser as (u:User)=>void}
                     boulders={boulders}
                 />;
             case 'profile':
                 return <ProfilePage currentUser={currentUser} onUpdateUser={handleUpdateUser} />;
-            case 'referee':
-                return <RefereePage
+            case 'management':
+                return <ManagementPage
                     allUsers={users}
                     onUpdateUser={handleUpdateUser as (u:User)=>void}
                     boulders={boulders}
@@ -246,7 +266,7 @@ const App: React.FC = () => {
                 currentUser={currentUser} 
             />
             <main>
-                {isLoading ? <div className="text-center p-8">Loading...</div> : renderPage()}
+                {renderPage()}
             </main>
         </div>
     );
