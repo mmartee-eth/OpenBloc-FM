@@ -7,8 +7,8 @@ interface LoginPageProps {
 }
 
 const LoginPage: React.FC<LoginPageProps> = ({ onLogin, error }) => {
-  const [email, setEmail] = useState('martiantentas@gmail.com');
-  const [password, setPassword] = useState('admin');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,6 +37,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin, error }) => {
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-3 py-2 text-brand-text bg-brand-surface-secondary border border-brand-border rounded-md focus:outline-none focus:ring-2 focus:ring-brand-accent"
               placeholder="user@example.com"
+              autoComplete="email"
+              required
             />
           </div>
           <div className="mb-6">
@@ -50,6 +52,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin, error }) => {
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-3 py-2 text-brand-text bg-brand-surface-secondary border border-brand-border rounded-md focus:outline-none focus:ring-2 focus:ring-brand-accent"
               placeholder="••••••••"
+              autoComplete="current-password"
+              required
             />
           </div>
           {error && <p className="text-red-500 text-xs italic mb-4">{error}</p>}
